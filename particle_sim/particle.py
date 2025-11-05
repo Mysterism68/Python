@@ -5,7 +5,7 @@ import math
 win_dim = (800, 600)
 zoom = 0.03125
 GRAV = 1#6.674 * 10**-11 #Normal Gravity
-speed = 1
+game_speed = 1
 cam_pos = [win_dim[0] // int(2 / zoom) , win_dim[1] // int(2 / zoom)]
 cam_pos_dir = [0, 0]
 def color(r, g, b):
@@ -21,7 +21,7 @@ class Gravity(object):
     self.anchored = anchorage
 class Particle(sdl2.ext.Entity):
   def __init__(self, world, diam: int, mass: float, posx=0,posy=0,
-    red=ran.randint(100, 255), green=ran.randint(100, 255), blue=ran.randint(100, 255), anc = False, vel_dir=0, magn = 0):
+    red=ran.randint(50, 255), green=ran.randint(50, 255), blue=ran.randint(50, 255), anc = False, vel_dir=0, magn = 0):
     self.sprite = factory.from_color(color(red, green, blue), size=(diam, diam))
     self.sprite.position = posx - diam//2, posy - diam//2
     self.gravity = Gravity(mass, anc)
@@ -32,9 +32,10 @@ class Particle(sdl2.ext.Entity):
   def apply_gravity(self, dist: float, speed: float, rot: float, sprite2):
     swidth, sheight = sprite2.size
     average_rad = (swidth + sheight) / 4
+    print(game_speed, end="\r")
     if dist >= speed:
-      self.gravity.vx += math.sin(rot) * speed * speed
-      self.gravity.vy += math.cos(rot) * speed * speed
+      self.gravity.vx += math.sin(rot) * speed
+      self.gravity.vy += math.cos(rot) * speed
     else:
       self.gravity.vx = math.sin(rot) * (dist-average_rad)
       self.gravity.vy = math.cos(rot) * (dist-average_rad)
@@ -55,7 +56,7 @@ class Particle(sdl2.ext.Entity):
           continue
         rot = get_rel_rot(center_sprite, other_center_sprite)
         speed = calculate_force(self.gravity.mass, sprite_grav.mass, dist)
-        self.apply_gravity(dist, speed, rot, sprite)
+        self.apply_gravity(dist, speed * game_speed, rot, sprite)
         """
         average_rad = (swidth + sheight) / 4
         if dist >= speed:

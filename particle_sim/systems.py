@@ -40,10 +40,10 @@ class SoftwareRenderer(sdl2.ext.SoftwareSpriteRenderSystem):
       x, y = sprite.position
       w, h = sprite.size
       scaled_rect = sdl2.SDL_Rect(
-        int(x * self.scale)-cam_pos[0],
-        int(y * self.scale)-cam_pos[1],
-        int(w * self.scale),
-        int(h * self.scale)
+        int(x * self.scale)-int(cam_pos[0]/zoom),
+        int(y * self.scale)-int(cam_pos[1]/zoom),
+        int(max(w * self.scale, 4)),
+        int(max(h * self.scale, 4))
       )
       center = (sprite.position[0] + w, sprite.position[1] + h)
       sdl2.SDL_BlitScaled(sprite.surface, None, self.surface, scaled_rect)

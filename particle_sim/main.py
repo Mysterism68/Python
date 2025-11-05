@@ -7,7 +7,6 @@ import random as rand
 import ctypes
 from particle import *
 from systems import *
-game_speed = 1
 mouse_x = 0
 mouse_y = 0
 mouse_down = False
@@ -27,13 +26,14 @@ def run():
   world.add_system(gravity)
   world.add_system(spriterenderer)
   moon_mass = 64
-  particles = [Particle(world, 512, moon_mass*162.54*1.25, int(400 / zoom), int(300 / zoom), 255, 255, 0)]
-  moons = 10
-  dist = 50
+  particles = [Particle(world, 192, 0, 0, 0, 255, 0, 0), Particle(world, 192, 0, 0, 0, 255, 0, 0),
+    Particle(world, 512, moon_mass*162.54*50, int(400 / zoom), int(300 / zoom), 255, 255, 0)]
+  moons = 3
+  dist = 128
   for i in range(moons):
     rot = i*(360/moons)
     particles.append(Particle(world, 192, moon_mass, int((400+math.sin(rot * (math.pi / 180))*dist) / zoom),
-      int((300+math.cos(rot * (math.pi / 180))*dist) / zoom), 225, 225, 255, vel_dir=rot+45, ))
+      int((300+math.cos(rot * (math.pi / 180))*dist) / zoom), 225, 225, 255, vel_dir=rot+90, magn=100))
   mouse_particle = Particle(world, 0, 0, 418, 300)
   gravity.particles = particles
   ticks_pressed = 0
@@ -53,12 +53,19 @@ def run():
     events = sdl2.ext.get_events()
     for part in particles:
       swidth, sheight = part.sprite.size
-      if ((mouse_x >= part.sprite.x - (swidth//2) and mouse_x <= part.sprite.x + (swidth//2)) and
-        (mouse_y >= part.sprite.y - (sheight//2) and mouse_y <= part.sprite.y + (sheight//2))):
+      if part.gravity.mass == 0:
+        continue
+      if swidth==512:
+        particles[0].sprite.x = part.sprite.x
+        particles[0].sprite.y = part.sprite.y
+        particles[1].sprite.x = part.sprite.x + swidth
+        particles[1].sprite.y = part.sprite.y + sheight
+      if ((mouse_x >= part.sprite.x and mouse_x <= part.sprite.x + swidth) and
+        (mouse_y >= part.sprite.y and mouse_y <= part.sprite.y + sheight)):
         print(mouse_down, end="\r")
         if mouse_down:
-          part.gravity.vx = mouse_x - part.sprite.x#(part.sprite.x - swidth // 2)
-          part.gravity.vy = mouse_y - part.sprite.y#(part.sprite.y - sheight // 2)
+          part.gravity.vx = mouse_x - (part.sprite.x)
+          part.gravity.vy = mouse_y - (part.sprite.y)
       else:
         if part.gravity.anchored:
           part.gravity.vx = 0
@@ -80,15 +87,15 @@ def run():
         if event.key.keysym.sym == sdl2.SDLK_c:
           particles[0].gravity.mass = -moon_mass * (27.04)
         if event.key.keysym.sym == sdl2.SDLK_w:
-          cam_pos_dir[1] = -1
+          cam_pos_dir[1] = -0.4
         if event.key.keysym.sym == sdl2.SDLK_s:
-          cam_pos_dir[1] = 1
+          cam_pos_dir[1] = 0.4
         if event.key.keysym.sym == sdl2.SDLK_a:
-          cam_pos_dir[0] = -1
+          cam_pos_dir[0] = -0.4
         if event.key.keysym.sym == sdl2.SDLK_d:
-          cam_pos_dir[0] = 1
+          cam_pos_dir[0] = 0.4
         if event.key.keysym.sym == sdl2.SDLK_SPACE:
-          game_speed = abs(game_speed - 1)
+          game_speed = 0
         if event.key.keysym.sym == sdl2.SDLK_EQUALS:
           zoom /= 2
         if event.key.keysym.sym == sdl2.SDLK_MINUS:
